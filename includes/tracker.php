@@ -16,9 +16,25 @@ class Omnoryu_Tracker {
     
     }
 
-    public function init() {
+    private function is_editor_mode() {
 
-        add_action('init', [$this, 'set_guest_id']);
+        if ( is_admin() ) {
+            return true;
+        }
+
+        if ( isset( $_GET['elementor-preview'] ) ) {
+            return true;
+        }
+
+        if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    public function init() {
 
         add_action('wp', function () {
 
@@ -35,7 +51,7 @@ class Omnoryu_Tracker {
 
             }
             
-            $this->track_post_view($post->ID, $post->post_type);
+            $this->track_post_view($post);
 
         });
 
@@ -63,7 +79,7 @@ class Omnoryu_Tracker {
 
     }
 
-    public function track_listing_view($object, $listing){
+    public function track_listing_view($object){
         
         if ((!$object) || (!$object->ID)) {
 
@@ -79,31 +95,23 @@ class Omnoryu_Tracker {
 
         $this->tracked_views[] = $object->ID;
 
-        $this->track_post_view($object->ID, $object->post_type);
+        $this->track_post_view($object);
     }
 
-    public function track_post_view($post_id, $post_type){
-       
-        if (!is_singular()) {
-                
-            return;
-
-        }
-    
-        $allowed_post_types= get_option('my_selected_post_type',[]);
+    public function track_post_view($post){
         
-        if(!$allowed_post_types) {
+        if ( $this->is_editor_mode() ) {
             
             return;
-        
-            }
-        
+       
+        }
+
         $user_id=get_current_user_id();
 
         $guest_id=$user_id ? 0: $this->set_guest_id();
         
         $this->db->add_view(
-            $post_id,
+            $post,
             $user_id,
             $guest_id
         );

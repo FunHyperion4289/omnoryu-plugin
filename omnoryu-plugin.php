@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 require_once __DIR__ . '/includes/db-installer.php';
 require_once __DIR__ . '/includes/omnoryu-options.php';
 require_once __DIR__ . '/includes/tracker.php';
+require_once __DIR__ . '/includes/macros.php';
 
 class Omnoryu_Plugin{
 
@@ -22,10 +23,15 @@ class Omnoryu_Plugin{
         $options = new Omnoryu_Options();
 
         $tracker = new Omnoryu_Tracker( $db );
+        
+        $macros = new Omnoryu_Macro( $db );
 
         $options->init();
 
         $tracker->init();
+
+        $macros->init();
+        
 
     }
 

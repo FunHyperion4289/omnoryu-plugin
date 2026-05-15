@@ -22,23 +22,28 @@ class Omnoryu_Options {
 
     public function register_settings() {
 
-        register_setting( 'omnoryu_settings_group', 'my_selected_post_type' );
-
         add_settings_section( 'omnoryu_section', 
             'Omnoryu Meta Boxes', 
             null, 
             'omnoryu_plugin_page' 
+        );
+
+        foreach ($this->get_settings_fields() as $id => $field ) {
+            
+            register_setting( 'omnoryu_settings_group', $id );
+            
+            add_settings_field( $id,
+                $field['title'],
+                [$this, 'omnoryu_plugin_setting_select_post_type'],            
+                'omnoryu_plugin_page', 
+                'omnoryu_section',
+                ['id' => $id, 'field' => $field]
             );
 
-        add_settings_field( 'omnoryu_post_types_field', 
-            'Select Post Types', 
-            [$this, 'omnoryu_plugin_setting_select_post_type'],            
-            'omnoryu_plugin_page', 
-            'omnoryu_section' 
-            );
-    
         }
-
+    
+    }
+    
     public function omnoryu_render_plugin_settings_page() {
         ?>
         <div class="wrap">
@@ -54,26 +59,49 @@ class Omnoryu_Options {
         <?php
     }
     
-    public function omnoryu_plugin_setting_select_post_type() {
+    public function omnoryu_plugin_setting_select_post_type($args){
+
+        $id = $args['id'];
+        $field = $args['field'];
+        $value = (array) get_option( $id, [] );
+
+        echo '<select name="' . esc_attr($id) . '[]" multiple style="min-height: 150px; width: 300px;">';
         
-        $selected = (array) get_option('my_selected_post_type', []);
-       
+        foreach ( $field['options'] as $val => $label ) {
+            
+            $is_sel = in_array( $val, $value ) ? 'selected' : '';
+
+            printf( '<option value="%s" %s>%s</option>', esc_attr($val), $is_sel, esc_html($label) );
+        
+        } 
+        
+    }
+
+    private function get_settings_fields() {
+        return [
+            'my_selected_post_type' => [
+                'title' => 'Select Post Type',
+                'options' => $this->get_post_types_options(),
+            ]
+        ];
+    }
+
+    private function get_post_types_options(){
+        
         $types = get_post_types(['public' => true], 'objects');
 
-        echo '<select name="my_selected_post_type[]" multiple style="min-height: 150px; width: 300px;">';
-        
+        $options = [];
+
         foreach ( $types as $type ) {
-
-            if ( $type->name === 'attachment' ) continue;
             
-            $is_sel = in_array( $type->name, $selected ) ? 'selected' : '';
-
-            printf( '<option value="%s" %s>%s</option>', esc_attr($type->name), $is_sel, esc_html($type->label) );
+            $options[$type->name] = $type->label;
         
         }
         
-        echo '</select>';
+        return $options;
+
     }
+
 }
 
 

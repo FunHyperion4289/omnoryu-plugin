@@ -5,6 +5,7 @@ defined( 'ABSPATH' ) || exit;
 class Omnoryu_DB {
 
     private $table_name;
+    private $meta_key = 'view_count';
 
     public function __construct() {
         
@@ -23,7 +24,7 @@ class Omnoryu_DB {
         
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-        $sql = "CREATE TABLE {$this->table_name} (
+        $sql = "CREATE TABLE IF NOT EXISTS {$this->table_name} (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             user_id BIGINT(20) UNSIGNED NOT NULL,
             post_id BIGINT(20) UNSIGNED NOT NULL,
@@ -36,28 +37,25 @@ class Omnoryu_DB {
     
     }
 
-    public function add_view( $post_id, $user_id = 0, $guest_id = ''){
-        
+    public function add_view( $post, $user_id = 0, $guest_id = ''){
+
         global $wpdb;
 
-        if ($user_id) {
-            $exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT id FROM {$this->table_name} WHERE post_id = %d AND user_id = %d",
-                $post_id,
-                $user_id
-            ));
-        } else {
-            $exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT id FROM {$this->table_name} WHERE post_id = %d AND guest_id = %s",
-                $post_id,
-                $guest_id
-            ));
-        }
+        if ( ! is_object( $post ) || empty( $post->ID ) || empty( $post->post_type ) ) {
 
-        if ($exists) {
-            
             return;
 
+        }
+
+        $post_id   = $post->ID;
+        $post_type = $post->post_type;
+
+        $allowed_post_types = (array) get_option( 'my_selected_post_type', [] );
+        
+        if ( empty( $allowed_post_types ) || ! in_array( $post_type, $allowed_post_types, true ) ) {
+            
+            return;
+        
         }
 
         $data = [
@@ -75,16 +73,39 @@ class Omnoryu_DB {
         
         $count = $this->get_view_count( $post_id );
 
-        update_post_meta( $post_id, 'view_count', $count+1 );
+        update_post_meta( $post_id, $this->meta_key, $count+1 );
         
         return true;
     }
 
     public function get_view_count( $post_id ) {
 
-        $count = get_post_meta( $post_id, 'view_count', true );
+        $count = get_post_meta( $post_id, $this->meta_key, true );
 
         return (int) $count;
 
     }
+
+    public function get_user_views_count($post_id, $user_id = 0, $guest_id = ''){
+
+        global $wpdb;
+
+        if ($user_id) {
+            $count = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(id) FROM {$this->table_name} WHERE post_id = %d AND user_id = %d",
+                $post_id,
+                $user_id
+            ));
+        } else {
+            $count = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(id) FROM {$this->table_name} WHERE post_id = %d AND guest_id = %s",
+                $post_id,
+                $guest_id
+            ));
+        }
+
+        return (int) $count;
+
+    }
+    
 }
