@@ -5,6 +5,7 @@ defined( 'ABSPATH' ) || exit;
 class Omnoryu_Options {
 
     public function init(){
+
         add_action( 'admin_init', [$this, 'register_settings']);
         add_action( 'admin_menu', function() {
             add_options_page( 
@@ -18,6 +19,7 @@ class Omnoryu_Options {
     }
 
     public function register_settings() {
+
         add_settings_section( 
             'omnoryu_section', 
             'Omnoryu Meta Boxes', 
@@ -54,6 +56,7 @@ class Omnoryu_Options {
     }
     
     public function omnoryu_plugin_setting_select_post_type($args){
+
         $id     = $args['id'];
         $field  = $args['field'];
         $value  = (array) get_option( $id, [] );
@@ -76,7 +79,9 @@ class Omnoryu_Options {
     }
 
     private function get_post_types_options(){
+
         $types = get_post_types(['public' => true], 'objects');
+
         $options = [];
         foreach ( $types as $type ) {
             $options[$type->name] = $type->label;

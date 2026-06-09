@@ -27,6 +27,7 @@ class Omnoryu_Tracker {
     }
 
     public function init() {
+
         add_action('wp', function () {
             if (!is_singular()) {
                 return;
@@ -42,6 +43,7 @@ class Omnoryu_Tracker {
     }
 
     public function set_guest_id() {
+
         if (!isset($_COOKIE['my_custom_cookie'])) {
             $value = wp_generate_uuid4();
             $expiry = time() + (86400 * 30);
@@ -54,6 +56,7 @@ class Omnoryu_Tracker {
     }
 
     public function track_listing_view($object){
+
         if ((!$object) || (!$object->ID)) {
             return;
         }
@@ -65,6 +68,7 @@ class Omnoryu_Tracker {
     }
 
     public function track_post_view($post){
+        
         if ( $this->is_editor_mode() ) {
             return;
         }

@@ -17,6 +17,7 @@ require_once __DIR__ . '/includes/macros.php';
 class Omnoryu_Plugin{
 
     public function init() {
+
         $db = new Omnoryu_DB();
         $options = new Omnoryu_Options();
         $tracker = new Omnoryu_Tracker( $db );
@@ -28,6 +29,7 @@ class Omnoryu_Plugin{
     }
 
     public static function activate() {
+
         $db = new Omnoryu_DB();
         $db->create_table();
     }
@@ -36,6 +38,7 @@ class Omnoryu_Plugin{
 register_activation_hook(__FILE__, ['Omnoryu_Plugin', 'activate']);
 
 add_action( 'plugins_loaded', function(){
+    
     $plugin = new Omnoryu_Plugin();
     $plugin->init();
 });

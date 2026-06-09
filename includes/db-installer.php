@@ -13,10 +13,12 @@ class Omnoryu_DB {
 
     public static function wpdb() {
         global $wpdb;
+
         return $wpdb;
     }
 
     public function create_table(){
+
         $wpdb    = self::wpdb();
         $charset = $wpdb->get_charset_collate();
         
@@ -35,6 +37,7 @@ class Omnoryu_DB {
     }
 
     public function add_view( $post, $user_id = 0, $guest_id = ''){
+
         if ( ! is_object( $post ) || empty( $post->ID ) || empty( $post->post_type ) ) {
             return;
         }
@@ -68,11 +71,13 @@ class Omnoryu_DB {
     }
 
     public function get_view_count( $post_id ) {
+
         $count = get_post_meta( $post_id, $this->meta_key, true );
         return (int) $count;
     }
 
     public function get_user_views_count($post_id, $user_id = 0, $guest_id = ''){
+        
         $wpdb = self::wpdb();
 
         if ($user_id) {

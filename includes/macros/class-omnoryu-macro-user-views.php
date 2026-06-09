@@ -5,6 +5,7 @@ class Omnoryu_Macro_User_Views extends \Jet_Engine_Base_Macros{
     private $db;
 
     public function __construct( $db ) {
+        
         $this->db = $db;
         parent::__construct(); 
     }
@@ -22,6 +23,7 @@ class Omnoryu_Macro_User_Views extends \Jet_Engine_Base_Macros{
 	}
 
 	public function macros_callback( $args = array() ) {
+
         $current_object = jet_engine()->listings->data->get_current_object();
         $post_id        = $current_object ? $current_object->ID : get_the_ID();
 
