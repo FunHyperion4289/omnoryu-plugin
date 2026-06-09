@@ -7,7 +7,8 @@ class Omnoryu_Options {
     public function init(){
         add_action( 'admin_init', [$this, 'register_settings']);
         add_action( 'admin_menu', function() {
-            add_options_page( 'Omnoryu Settings', 
+            add_options_page( 
+                'Omnoryu Settings', 
                 'Omnoryu Plugin', 
                 'manage_options', 
                 'omnoryu-plugin', 
