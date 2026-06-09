@@ -8,18 +8,16 @@ class Omnoryu_DB {
     private $meta_key = 'view_count';
 
     public function __construct() {
-        
-        global $wpdb;
-        
-        $this->table_name = $wpdb->prefix.'omnoryu_views_table';
-    
+        $this->table_name = self::wpdb()->prefix.'omnoryu_views_table';
     }
 
+    public static function wpdb() {
+        global $wpdb;
+        return $wpdb;
+    }
 
     public function create_table(){
-        
-        global $wpdb;
-
+        $wpdb    = self::wpdb();
         $charset = $wpdb->get_charset_collate();
         
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -34,17 +32,11 @@ class Omnoryu_DB {
             ) $charset;";
         
         dbDelta($sql);
-    
     }
 
     public function add_view( $post, $user_id = 0, $guest_id = ''){
-
-        global $wpdb;
-
         if ( ! is_object( $post ) || empty( $post->ID ) || empty( $post->post_type ) ) {
-
             return;
-
         }
 
         $post_id   = $post->ID;
@@ -53,9 +45,7 @@ class Omnoryu_DB {
         $allowed_post_types = (array) get_option( 'my_selected_post_type', [] );
         
         if ( empty( $allowed_post_types ) || ! in_array( $post_type, $allowed_post_types, true ) ) {
-            
             return;
-        
         }
 
         $data = [
@@ -66,29 +56,24 @@ class Omnoryu_DB {
         if ($user_id){
             $data['user_id'] = $user_id;
         } else{
-            $data['guest_id'] = $guest_id;
+            $data['guest_id'] = sanitize_text_field($guest_id);
         }
 
-        $wpdb -> insert($this->table_name, $data);
+        self::wpdb() -> insert($this->table_name, $data);
         
         $count = $this->get_view_count( $post_id );
-
         update_post_meta( $post_id, $this->meta_key, $count+1 );
         
         return true;
     }
 
     public function get_view_count( $post_id ) {
-
         $count = get_post_meta( $post_id, $this->meta_key, true );
-
         return (int) $count;
-
     }
 
     public function get_user_views_count($post_id, $user_id = 0, $guest_id = ''){
-
-        global $wpdb;
+        $wpdb = self::wpdb();
 
         if ($user_id) {
             $count = $wpdb->get_var($wpdb->prepare(
@@ -100,7 +85,7 @@ class Omnoryu_DB {
             $count = $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(id) FROM {$this->table_name} WHERE post_id = %d AND guest_id = %s",
                 $post_id,
-                $guest_id
+                sanitize_text_field($guest_id)
             ));
         }
 

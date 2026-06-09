@@ -20,7 +20,10 @@ class Omnoryu_Macro {
         if ( ! class_exists( '\Jet_Engine_Base_Macros' ) ) {
             return;
         }
-        require_once __DIR__ . '/macro-code.php';
+
+        require_once __DIR__ . '/macros/class-omnoryu-macro-total-views.php';
+        require_once __DIR__ . '/macros/class-omnoryu-macro-user-views.php';
+
         new Omnoryu_Macro_Total_Views($this->db);
         new Omnoryu_Macro_User_Views($this->db);
     }
