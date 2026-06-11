@@ -80,19 +80,15 @@ class Omnoryu_DB {
         
         $wpdb = self::wpdb();
 
-        if ($user_id) {
-            $count = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(id) FROM {$this->table_name} WHERE post_id = %d AND user_id = %d",
-                $post_id,
-                $user_id
-            ));
-        } else {
-            $count = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(id) FROM {$this->table_name} WHERE post_id = %d AND guest_id = %s",
-                $post_id,
-                sanitize_text_field($guest_id)
-            ));
-        }
+        $sql         = "SELECT COUNT(id) FROM {$this->table_name} WHERE post_id = %d AND";
+        $user_where  = $user_id ? " user_id = %d" : " guest_id = %s";
+        $u_id        = $user_id ?? $guest_id;
+
+        $count = $wpdb->get_var( $wpdb->prepare(
+            $sql . $user_where,
+            $post_id,
+            $u_id
+        ));
 
         return (int) $count;
 
